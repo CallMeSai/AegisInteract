@@ -1,0 +1,29 @@
+﻿@page "/wake"
+@inject Classes.Interfaces.IWakeOnLan WakeOnLanState
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@implements IDisposable
+<h3>WakeOnLan</h3>
+<EditForm Model="@WakeOnLanState" OnSubmit="@DoWakeOnLan">
+    <InputText @bind-Value="@WakeOnLanState.MacAddress"/>
+    <button type="submit" class="btn btn-primary"> Wake On Lan</button>
+</EditForm>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        WakeOnLanState.MacAddress = await localStorage.GetItemAsync<string>("macAddress");
+        WakeOnLanState.StateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        WakeOnLanState.StateChanged -= StateHasChanged;
+    }
+
+    protected async Task DoWakeOnLan()
+    {
+        await localStorage.SetItemAsync("macAddress", WakeOnLanState.MacAddress);
+        await WakeOnLanState.DoWakeOnLan();
+    }
+}
